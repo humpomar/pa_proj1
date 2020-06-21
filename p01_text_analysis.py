@@ -27,75 +27,89 @@ registered_users = {
     'mike': 'password123',
     'liz': 'pass123',
 }
-text_id = {'1', '2', '3'}
 line = '=' * 70
 
-# User input
 
-print(line)
-print('Welcome to our Text Analyzer!')
-print(line)
+def main():
+    intro()
+    user_login()
+    text = choose_text()
+    analyze_text(text)
 
-print('Please log in.')
-username = input('Enter your username: ')
-if username not in registered_users.keys():
-    print('Login failed (invalid username)!')
-    exit()
-password = input('Enter your password: ')
-if registered_users.get(username) == password:
+
+def intro() -> None:
+    print(line)
+    print("Welcome to our Text Analyzer!")
+    print(line)
+
+
+def user_login() -> None:
+    print("Please log in.")
+    username = input("Enter your username: ")
+    while username not in registered_users.keys():
+        print("\nLogin failed (invalid username)! ")
+        username = input("Enter you username again or type 'exit' to end the application: ")
+        if username == "exit":
+            print("Thank you for using our application. See you later!")
+            exit()
+    password = input("Enter your password: ")
+    while registered_users.get(username) != password:
+        print("\nLogin failed (wrong password)! ")
+        password = input("Enter your password again or type 'exit' to end the application: ")
+        if password == "exit":
+            print("Thank you for using our application. See you later!")
+            exit()
     print('Login successful!')
     print(line)
-else:
-    print('Login failed (invalid password)!')
-    exit()
 
-print('We have 3 texts to be analyzed.')
-user_choice = ''
-while user_choice not in text_id:
-    user_choice = input('''Please enter a number from 1 to 3 to select the text 
-or type exit to end the application: ''')
-    if user_choice == 'exit':
-        print('See you later!')
-        exit()
-else:
+
+def choose_text() -> str():
+    print(f"We have {len(texts)} texts to be analyzed.")
+    message = f"Please enter a number from 1 to {len(texts)} to select the text " \
+              f"\nor type 'exit' to end the application: "
+    while True:
+        choice = (input(message))
+        if choice == "exit":
+            print("Thank you for using our application. See you later!")
+            exit()
+        try:
+            text = texts[int(choice)-1]
+            print(f"{line}\nSelected text: \n{text}\n{line}")
+            return text
+        except (ValueError, IndexError):
+            print(f"\nInvalid input. Please try again!")
+
+
+def analyze_text(my_text: str) -> None:
+    word_list = [word.strip(' ,.!') for word in my_text.split()]
+    title_words, upper_words, lower_words, numbers_count, numbers_sum = 0, 0, 0, 0, 0
+    word_count = {}
+
+    for word in word_list:
+        if word.istitle():
+            title_words += 1
+        if word.isupper():
+            upper_words += 1
+        if word.islower():
+            lower_words += 1
+        if word.isnumeric():
+            numbers_count += 1
+            numbers_sum += (int(word))
+        word_count[len(word)] = word_count.setdefault(len(word), 0) + 1
+
+    print(f"There are {len(word_list)} words in the selected text.")
+    print(f"There are {title_words} titlecase words in the text.")
+    print(f"There are {upper_words} uppercase words in the text.")
+    print(f"There are {lower_words} lowercase words in the text.")
+    print(f"There are {numbers_count} numeric strings in the text.")
     print(line)
-    text = texts[int(user_choice)-1]
-    print(f'Selected text: \n{text}')
+
+    for length in sorted(word_count.keys()):
+        print(f'{length}-letter words: \t {"*" * word_count[length]} ({word_count[length]}x)')
     print(line)
 
-# Text analysis
+    print(f'If we summed all the numbers in this text we would get: {numbers_sum}.')
+    print(line)
 
-text_length = len(text.split())
-title_words = 0
-upper_words = 0
-lower_words = 0
-numbers = []
-word_count = {}
 
-for raw_word in text.split():
-    word = raw_word.strip(' ,.!')
-    if word.istitle():
-        title_words += 1
-    if word.isupper():
-        upper_words += 1
-    if word.islower():
-        lower_words += 1
-    if word.isnumeric():
-        numbers.append(int(word))
-    word_count[len(word)] = word_count.setdefault(len(word), 0) + 1
-
-# Output
-
-print(f'There are {text_length} words in the selected text.')
-print(f'There are {title_words} titlecase word(s) in the text.')
-print(f'There are {upper_words} uppercase word(s) in the text.')
-print(f'There are {lower_words} lowercase word(s) in the text.')
-print(f'There are {len(numbers)} numeric string(s) in the text.')
-print(line)
-
-for length in sorted(word_count.keys()):
-    print(f'{length}-letter words: \t {"*" * word_count[length]} ({word_count[length]}x)')
-print(line)
-
-print(f'If we summed all the numbers in this text we would get: {sum(numbers)}.')
-print(line)
+main()
